@@ -21,18 +21,25 @@ class Person:
 
         http_client = None 
         if proxy_url:
-            http_client=httpx.Client(proxies={
+            # http_client=httpx.Client(proxies={
+            #     "https://": proxy_url
+            # }) 
+            http_client = httpx.AsyncClient(proxies={
                 "https://": proxy_url
-            }) 
-
-        self.client = openai.OpenAI(
+            })
+        
+        # self.client = openai.OpenAI(
+        #     api_key=openai_api_key,
+        #     http_client=http_client
+        # )
+        self.client = openai.AsyncOpenAI(
             api_key=openai_api_key,
             http_client=http_client
         )
 
-    def generate_answer(self, prompt: str, **kwargs) -> str:
+    async def generate_answer(self, prompt: str, **kwargs) -> str:
         self.messages.append({"role": "user", "content": prompt})
-        chat_completion = self.client.chat.completions.create(
+        chat_completion = await self.client.chat.completions.create(
             messages=[
                 *self.messages,
             ],

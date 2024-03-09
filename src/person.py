@@ -3,16 +3,14 @@ import random
 import openai 
 import httpx 
 
-from config import OPENAI_API_KEY, PROXY_URL
-
 
 class Person:
 
     def __init__(
         self,
         base_prompt: str,
-        openai_api_key: str = OPENAI_API_KEY,
-        proxy_url: str = PROXY_URL,
+        openai_api_key: str,
+        proxy_url: str,
         words_correction: dict[str, list[str]] | None = None 
     ) -> None:
         self.words_correction = words_correction
@@ -21,17 +19,10 @@ class Person:
 
         http_client = None 
         if proxy_url:
-            # http_client=httpx.Client(proxies={
-            #     "https://": proxy_url
-            # }) 
             http_client = httpx.AsyncClient(proxies={
                 "https://": proxy_url
             })
         
-        # self.client = openai.OpenAI(
-        #     api_key=openai_api_key,
-        #     http_client=http_client
-        # )
         self.client = openai.AsyncOpenAI(
             api_key=openai_api_key,
             http_client=http_client

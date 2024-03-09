@@ -5,14 +5,12 @@ import wave
 
 import aiohttp 
 
-from config import SPEECH_TOKEN
-
 
 class Speech:
 
     def __init__(
         self,
-        token: str = SPEECH_TOKEN 
+        token: str
     ) -> None:
         self.token = token
 

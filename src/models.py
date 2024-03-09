@@ -1,10 +1,6 @@
 import enum 
 
-
-class Voice(enum.Enum):
-    FILIPP = "filipp"
-    ZAHAR = "zahar"
-    MADIRUS = "madirus"
+from _types import Voice
 
 
 class MaxMaxbetov(enum.Enum):

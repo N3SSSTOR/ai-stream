@@ -5,16 +5,21 @@ from models import MaxMaxbetov, SaveliiJournalistov
 from person import Person 
 from speech import Speech
 
+from config import OPENAI_API_KEY, PROXY_URL, SPEECH_TOKEN
+
 
 
 async def dialog_generation() -> None:
-    speech = Speech()
+    speech = Speech(SPEECH_TOKEN)
+
+    person_config = dict(openai_api_key=OPENAI_API_KEY, proxy_url=PROXY_URL)
 
     person_1 = Person(
+        **person_config,
         base_prompt=MaxMaxbetov.PROMPT.value,
         words_correction=MaxMaxbetov.WORDS_CORRECTION.value 
     )
-    person_2 = Person(base_prompt=SaveliiJournalistov.PROMPT.value)
+    person_2 = Person(**person_config, base_prompt=SaveliiJournalistov.PROMPT.value)
 
     question = await person_2.generate_answer("Можешь задать первый вопрос.", temperature=0.5)
 

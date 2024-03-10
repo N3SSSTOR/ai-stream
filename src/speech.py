@@ -20,8 +20,6 @@ class Speech:
             "Authorization": f"Bearer {iam_token}"
         }
 
-        # response = requests.get(url, headers=headers)
-        # return response.json().get("clouds")[0].get("id")
         async with aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(ssl=False)
         ) as session:
@@ -30,15 +28,12 @@ class Speech:
                 return data.get("clouds")[0].get("id")
 
 
-    async def get_iam_token(self, token: str) -> dict:
+    async def get_iam_token(self, token: str) -> str:
         url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
 
         headers = {"Content-Type": "application/json"}
         data = {"yandexPassportOauthToken": token}
 
-        # response = requests.post(url, headers=headers, data=json.dumps(data))
-        # response_data = response.json()
-        # return response_data.get("iamToken")
         async with aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(ssl=False)
         ) as session:
@@ -62,8 +57,6 @@ class Speech:
             params = {"cloudId": cloud_id }
             headers = {"Authorization": f"Bearer {iam_token}"}
 
-            # response = requests.get(url, params=params, headers=headers)
-            # return response.json().get("folders")[0].get("id")
             async with aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(ssl=False)
             ) as session:
@@ -100,7 +93,6 @@ class Speech:
             "sampleRateHertz": "48000"
         }
 
-        # response = requests.post(url, headers=headers, data=data)
         async with aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(ssl=False)
         ) as session:

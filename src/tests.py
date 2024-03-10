@@ -1,9 +1,12 @@
-from donation.server import run_server
+import asyncio 
+
+from donation.utils import get_donation_alerts_list
 
 
-def main() -> None:
-    run_server()
+async def main() -> None:
+    result = await get_donation_alerts_list()
+    print(result)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

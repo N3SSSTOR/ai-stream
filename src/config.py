@@ -8,3 +8,6 @@ PROXY_URL = os.getenv("PROXY_URL")
 SPEECH_TOKEN = os.getenv("SPEECH_TOKEN")
 DONATION_ID = os.getenv("DONATION_ID")
 DONATION_SECRET = os.getenv("DONATION_SECRET")
+
+DB_CONNECTION_URL = "sqlite+aiosqlite:///db.sqlite"
+ECHO = False  

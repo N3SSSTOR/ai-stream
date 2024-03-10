@@ -1,31 +1,35 @@
 import uvicorn
 from fastapi import FastAPI, responses
 
+from config import DONATION_ID, DONATION_SECRET
 from .api import DonationAlertsAPI
 from ._types import Scope 
+from .database._requests import set_tokens
 
-CLIENT_ID = "12466"
-CLIENT_SECRET = "1swGklN70ErQ59QmAXuEKO6ahqp6T1Mnxjby8cik"
+DONATION_CONFIG = dict(
+    client_id=DONATION_ID, 
+    client_secret=DONATION_SECRET,
+    redirect_uri="http://127.0.0.1:5000/login",
+    scope=Scope.DONATION_INDEX.value
+)
 
 app = FastAPI()
 
 
 @app.get("/")
 async def root():
-    donation = DonationAlertsAPI(
-        client_id=CLIENT_ID, 
-        client_secret=CLIENT_SECRET
-    )
-    login_uri = await donation.get_login_uri(
-        redirect_uri="http://127.0.0.1:5000/login",
-        scope=Scope.USER_SHOW.value 
-    )
+    donation = DonationAlertsAPI(**DONATION_CONFIG)
+    login_uri = await donation.get_login_uri()
     return responses.RedirectResponse(login_uri)
 
 
 @app.get("/login")
 async def login(code: str):
-    return code 
+    donation = DonationAlertsAPI(**DONATION_CONFIG)
+    tokens = await donation.get_tokens(code)
+
+    await set_tokens(tokens.get("access"), tokens.get("refresh"))
+    return tokens 
 
 
 def run_server():

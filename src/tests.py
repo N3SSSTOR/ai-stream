@@ -1,10 +1,11 @@
 import asyncio 
 
-from donation.utils import get_donation_alerts_list
+from donation.utils import get_donations
+from donation.database._requests import add_processed_donation, get_processed_donations
 
 
 async def main() -> None:
-    result = await get_donation_alerts_list()
+    result = await get_donations()
     print(result)
 
 

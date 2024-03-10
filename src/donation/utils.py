@@ -12,10 +12,10 @@ async def refresh_tokens():
     await set_tokens(new_tokens.get("access"), new_tokens.get("refresh"))
 
 
-async def get_donation_alerts_list():
+async def get_donations():
     await refresh_tokens() 
 
     tokens = await get_tokens()
-    alerts_list = await DonationAlertsAPI.get_donation_alerts_list(tokens.get("access"))
+    donations = await DonationAlertsAPI.get_donations(tokens.get("access"))
 
-    return alerts_list 
+    return donations

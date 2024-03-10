@@ -19,6 +19,13 @@ class TokenPair(Base):
     refresh_token: Mapped[str]
 
 
+class ProcessedDonation(Base):
+    __tablename__ = "processed_donations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    donation_id: Mapped[int]
+
+
 async def async_create_tables():
     async with engine.begin() as session:
         await session.run_sync(Base.metadata.create_all)

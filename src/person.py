@@ -8,14 +8,16 @@ class Person:
 
     def __init__(
         self,
-        base_prompt: str,
         openai_api_key: str,
         proxy_url: str,
-        words_correction: dict[str, list[str]] | None = None 
+        model,
     ) -> None:
-        self.words_correction = words_correction
+        self.words_correction = model.WORDS_CORRECTION.value 
         self.messages = []
-        self.messages.append({"role": "system", "content": base_prompt})
+        self.messages.append({
+            "role": "system", 
+            "content": model.PROMPT.value 
+        })
 
         http_client = None 
         if proxy_url:

@@ -1,0 +1,7 @@
+python-dotenv 
+openai
+aiohttp 
+fastapi[all]
+sqlalchemy 
+aiosqlite
+moviepy

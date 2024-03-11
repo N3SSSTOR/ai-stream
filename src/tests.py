@@ -1,13 +1,14 @@
-import asyncio 
+from moviepy import editor 
 
-from donation.utils import get_donations
-from donation.database._requests import add_processed_donation, get_processed_donations
+BASE_DIR = "assets/"
 
 
-async def main() -> None:
-    result = await get_donations()
-    print(result)
+def main():
+    layout_clip = editor.ImageClip(BASE_DIR + "img/layout_2.png")
+    clips = [layout_clip]
+
+    
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

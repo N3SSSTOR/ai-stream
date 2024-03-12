@@ -1,7 +1,7 @@
 import os 
 import dotenv 
 
-from models import BrokeMaxMaxbetov, BrokeSaveliiJournalistov
+import person.objects as persons
 
 dotenv.load_dotenv()
 
@@ -14,5 +14,5 @@ DONATION_SECRET = os.getenv("DONATION_SECRET")
 DB_CONNECTION_URL = "sqlite+aiosqlite:///db.sqlite"
 ECHO = False  
 
-PERSON_1 = BrokeMaxMaxbetov
-PERSON_2 = BrokeSaveliiJournalistov
+PERSON_1 = persons.BrokeMaxMaxbetov
+PERSON_2 = persons.BrokeSaveliiJournalistov

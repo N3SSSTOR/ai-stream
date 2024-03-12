@@ -1,7 +1,8 @@
 python-dotenv 
 openai
 aiohttp 
-fastapi[all]
+fastapi[uvicorn]
 sqlalchemy 
 aiosqlite
+pydantic
 moviepy

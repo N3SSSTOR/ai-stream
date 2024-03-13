@@ -124,9 +124,11 @@ BrokeMaxMaxbetov = PersonModel(
         "донатить": ["дон+атьте"],
         "донатите": ["дон+атьте"],
         "анальдини": ["анальд+ини"],
+        "стримлю": ["стр+имлю"],
         "стримы": ["стрим+ы"]
     },
     voice=Voice.FILIPP.value,
+    talking_scene_path=ASSETS_DIR + "video/scenes/broke_max_talking.mp4"
 )
 
 
@@ -143,4 +145,5 @@ BrokeSaveliiJournalistov = PersonModel(
         больше каверзных вопросов
     """,
     voice=Voice.ZAHAR.value,
+    talking_scene_path=ASSETS_DIR + "video/scenes/journalist_talking.mp4"
 )

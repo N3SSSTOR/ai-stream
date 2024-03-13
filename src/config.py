@@ -1,7 +1,8 @@
 import os 
 import dotenv 
 
-import person.objects as persons
+from person import objects as persons
+from person.objects import ASSETS_DIR
 
 dotenv.load_dotenv()
 
@@ -11,8 +12,13 @@ SPEECH_TOKEN = os.getenv("SPEECH_TOKEN")
 DONATION_ID = os.getenv("DONATION_ID")
 DONATION_SECRET = os.getenv("DONATION_SECRET")
 
+PERSON_1 = persons.BrokeMaxMaxbetov
+PERSON_2 = persons.BrokeSaveliiJournalistov
+
 DB_CONNECTION_URL = "sqlite+aiosqlite:///db.sqlite"
 ECHO = False  
 
-PERSON_1 = persons.BrokeMaxMaxbetov
-PERSON_2 = persons.BrokeSaveliiJournalistov
+PAUSE_SCENE_PATH = ASSETS_DIR + "video/scenes/pause.mp4"
+PAUSE_SCENE_DURATION = 0
+
+CHANNEL_URL = "https://www.youtube.com/@CR1NGESQD"

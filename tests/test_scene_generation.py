@@ -14,7 +14,7 @@ PERSON_1_POS = (X_OFFSET, Y_OFFSET)
 PERSON_2_POS = (X_OFFSET + X_MARGIN, Y_OFFSET)
 
 
-def main():
+def test() -> None:
     layout = editor.ImageClip(BASE_DIR + "img/layout_3.png").set_duration(BASE_DURATION)
 
     img1 = editor.ImageClip(BASE_DIR + "img/broke_max.jpeg")\
@@ -43,6 +43,10 @@ def main():
     ])
 
     clips.write_videofile("result.mp4", fps=1)
+
+
+def main() -> None:
+    test()
 
 
 if __name__ == "__main__":

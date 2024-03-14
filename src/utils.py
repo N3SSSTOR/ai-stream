@@ -15,7 +15,6 @@ from donation.database._requests import add_processed_donation, get_processed_do
 
 def create_video(file_path: str, donations: list) -> None:
     scene_audio = mvp.AudioFileClip(file_path)
-    scene_pause = mvp.VideoFileClip(PAUSE_SCENE_PATH).set_duration(PAUSE_SCENE_DURATION)
 
     file_data = file_path.replace("upload/audio/", "").replace(".wav", "").split("_")
 
@@ -41,13 +40,13 @@ def create_video(file_path: str, donations: list) -> None:
     donations_labels = []
 
     x_offset = 1225
-    y_offset = 150 
+    y_offset = 60 
     y_spacing = 125 
 
     for i, donation in enumerate(top_donations):
         donations_labels.append(
             mvp.TextClip(
-                txt=f"Anonymous - {donation.get('amount')} RUB",
+                txt=f"{donation.get('username')} - {donation.get('amount')} RUB",
                 color="gold" if i == 0 else "gray",
                 font=MAIN_FONT_PATH,
                 fontsize=55 
@@ -59,10 +58,13 @@ def create_video(file_path: str, donations: list) -> None:
         current_scene,
         channel_label,
         *donations_labels,
-        scene_pause.set_start(current_scene.duration)
     ]) 
 
-    result_scene.write_videofile(f"upload/video/{counter}_{int(time.time())}.mp4", fps=FPS)
+    file_name = f"{counter}"
+    result_scene.write_videofile(
+        f"upload/video/{file_name}.mp4", 
+        fps=FPS
+    )
     os.remove(file_path)
 
 
@@ -131,12 +133,21 @@ async def video_streaming() -> None:
     while True:
         try:
             files = os.listdir(videos_dir)
-            for file in files:
+            sorted_files = sorted(
+                files, 
+                key=lambda x: int(x.split(".")[0]), reverse=False
+            )
+
+            for file in sorted_files:
                 if file.lower().endswith(".mp4"):
-                    file_counter = int(file.split("_")[0])
+                    file_counter = int(file.split(".")[0])
 
                     if file_counter == counter:
+                        # Тут стримим видос
                         counter += 1  
+                        continue 
+                        
+                    # Хз мб тут пауза 
 
         except Exception as e:
             print(e)

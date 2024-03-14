@@ -19,7 +19,7 @@ DB_CONNECTION_URL = "sqlite+aiosqlite:///db.sqlite"
 ECHO = False  
 
 PAUSE_SCENE_PATH = ASSETS_DIR + "video/scenes/pause.mp4"
-PAUSE_SCENE_DURATION = 0
+PAUSE_SCENE_DURATION = 5
 
 FPS = 12 
 MAIN_FONT_PATH = ASSETS_DIR + "font/FulboArgenta.ttf"

@@ -21,4 +21,5 @@ ECHO = False
 PAUSE_SCENE_PATH = ASSETS_DIR + "video/scenes/pause.mp4"
 PAUSE_SCENE_DURATION = 0
 
-CHANNEL_URL = "https://www.youtube.com/@CR1NGESQD"
+FPS = 12 
+MAIN_FONT_PATH = ASSETS_DIR + "font/FulboArgenta.ttf"

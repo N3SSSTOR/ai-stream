@@ -6,7 +6,7 @@ import moviepy.editor as mvp
 from person.ai import PersonAI
 from person.speech import Speech
 
-from config import OPENAI_API_KEY, PROXY_URL, SPEECH_TOKEN, CHANNEL_URL
+from config import OPENAI_API_KEY, PROXY_URL, SPEECH_TOKEN, FPS, MAIN_FONT_PATH
 from config import PERSON_1, PERSON_2, PAUSE_SCENE_PATH, PAUSE_SCENE_DURATION
 
 from donation.utils import get_donations
@@ -29,19 +29,40 @@ def create_video(file_path: str, donations: list) -> None:
 
     current_scene = current_scene.set_duration(scene_audio.duration)\
         .set_audio(scene_audio)
-    channel_label = mvp.TextClip(txt=CHANNEL_URL, 
+    
+    channel_label = mvp.TextClip(txt=f"Всего донатов: {len(donations)}", 
                                  color="white",
+                                 font=MAIN_FONT_PATH,
                                  fontsize=45)\
         .set_duration(current_scene.duration)\
         .set_position((80, 25))
     
+    top_donations = sorted(donations, key=lambda x: x['amount'], reverse=True)[:5]
+    donations_labels = []
+
+    x_offset = 1225
+    y_offset = 150 
+    y_spacing = 125 
+
+    for i, donation in enumerate(top_donations):
+        donations_labels.append(
+            mvp.TextClip(
+                txt=f"Anonymous - {donation.get('amount')} RUB",
+                color="gold" if i == 0 else "gray",
+                font=MAIN_FONT_PATH,
+                fontsize=55 
+            ).set_duration(current_scene.duration)\
+             .set_position((x_offset, y_offset + (y_spacing * (i + 1))))
+        )
+    
     result_scene = mvp.CompositeVideoClip([
         current_scene,
         channel_label,
+        *donations_labels,
         scene_pause.set_start(current_scene.duration)
     ]) 
 
-    result_scene.write_videofile(f"upload/video/{counter}_{int(time.time())}.mp4", fps=12)
+    result_scene.write_videofile(f"upload/video/{counter}_{int(time.time())}.mp4", fps=FPS)
     os.remove(file_path)
 
 

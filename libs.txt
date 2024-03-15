@@ -1,8 +1,0 @@
-python-dotenv 
-openai
-aiohttp 
-fastapi[uvicorn]
-sqlalchemy 
-aiosqlite
-pydantic
-moviepy

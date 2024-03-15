@@ -1,3 +1,5 @@
+from contextlib import suppress
+import subprocess 
 import time 
 import os 
 
@@ -6,8 +8,12 @@ import moviepy.editor as mvp
 from person.ai import PersonAI
 from person.speech import Speech
 
-from config import OPENAI_API_KEY, PROXY_URL, SPEECH_TOKEN, FPS, MAIN_FONT_PATH
-from config import PERSON_1, PERSON_2, PAUSE_SCENE_PATH, PAUSE_SCENE_DURATION
+from config import (
+    OPENAI_API_KEY, PROXY_URL, 
+    SPEECH_TOKEN, STREAM_KEY, 
+    STREAM_URL, PERSON_1, 
+    PERSON_2, FPS, MAIN_FONT_PATH
+)
 
 from donation.utils import get_donations
 from donation.database._requests import add_processed_donation, get_processed_donations
@@ -29,7 +35,7 @@ def create_video(file_path: str, donations: list) -> None:
     current_scene = current_scene.set_duration(scene_audio.duration)\
         .set_audio(scene_audio)
     
-    channel_label = mvp.TextClip(txt=f"Всего донатов: {len(donations)}", 
+    donations_count_label = mvp.TextClip(txt=f"Всего донатов: {len(donations)}", 
                                  color="white",
                                  font=MAIN_FONT_PATH,
                                  fontsize=45)\
@@ -56,15 +62,21 @@ def create_video(file_path: str, donations: list) -> None:
     
     result_scene = mvp.CompositeVideoClip([
         current_scene,
-        channel_label,
+        donations_count_label,
         *donations_labels,
     ]) 
 
     file_name = f"{counter}"
+
+    process_path = f"upload/in_process/{file_name}.mp4"
     result_scene.write_videofile(
-        f"upload/video/{file_name}.mp4", 
+        process_path, 
         fps=FPS
     )
+
+    query = f"mv {process_path} {process_path.replace('in_process', 'video')}"
+    subprocess.run(query.split(" "))
+
     os.remove(file_path)
 
 
@@ -76,7 +88,7 @@ async def dialog_generation() -> None:
     person_1 = PersonAI(**person_config, model=PERSON_1)
     person_2 = PersonAI(**person_config, model=PERSON_2)
 
-    question = await person_2.generate_answer("Можешь задать первый вопрос.", temperature=0.5)
+    question = await person_2.generate_answer("Можешь задать первый вопрос.")
 
     counter = 0 
     while True:     
@@ -92,9 +104,9 @@ async def dialog_generation() -> None:
             )
             create_video(file_path, all_donations)
 
-            print(f"\n\n{'='*5} САВЕЛИЙ ЖУРНАЛИСТОВ: {'='*5}\n\n{question}\nFILE PATH: {file_path}")
+            print(f"\n\n{'='*5} PERSON II: {'='*5}\n\n{question}\nFILE PATH: {file_path}")
 
-            answer = await person_1.generate_answer(question, temperature=0.5)
+            answer = await person_1.generate_answer(question)
 
             counter += 1
             file_path = await speech.text_to_speech(
@@ -104,7 +116,7 @@ async def dialog_generation() -> None:
             )
             create_video(file_path, all_donations)
 
-            print(f"\n\n{'='*5} МАКС МАКСБЕТОВ: {'='*5}\n\n{answer}\nFILE PATH: {file_path}")
+            print(f"\n\n{'='*5} PERSON I: {'='*5}\n\n{answer}\nFILE PATH: {file_path}")
 
             question = ""
             processed_donations = await get_processed_donations()
@@ -126,16 +138,18 @@ async def dialog_generation() -> None:
             print(e)
 
 
-async def video_streaming() -> None:
+def video_streaming() -> None:
     videos_dir = "upload/video/"
     
     counter = 1
     while True:
         try:
+            time.sleep(1)
+
             files = os.listdir(videos_dir)
             sorted_files = sorted(
                 files, 
-                key=lambda x: int(x.split(".")[0]), reverse=False
+                key=lambda x: int(x.split(".")[0])
             )
 
             for file in sorted_files:
@@ -143,11 +157,15 @@ async def video_streaming() -> None:
                     file_counter = int(file.split(".")[0])
 
                     if file_counter == counter:
-                        # Тут стримим видос
+                        video_path = f"{videos_dir}/{file}"
+                        query = (
+                            f"ffmpeg -re -i {video_path} -f flv {STREAM_URL}/{STREAM_KEY}"
+                        )
+
+                        with suppress(Exception):
+                            subprocess.run(query.split(" "))
+
                         counter += 1  
-                        continue 
-                        
-                    # Хз мб тут пауза 
 
         except Exception as e:
             print(e)

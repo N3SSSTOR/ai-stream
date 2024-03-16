@@ -3,6 +3,7 @@ import dotenv
 
 from person import objects as persons
 from person.objects import ASSETS_DIR
+from person._types import TextModel
 
 dotenv.load_dotenv()
 
@@ -11,8 +12,10 @@ PROXY_URL = os.getenv("PROXY_URL")
 SPEECH_TOKEN = os.getenv("SPEECH_TOKEN")
 DONATION_ID = os.getenv("DONATION_ID")
 DONATION_SECRET = os.getenv("DONATION_SECRET")
-STREAM_KEY = os.getenv("STREAM_KEY_2")
+STREAM_KEY = os.getenv("STREAM_KEY")
 STREAM_URL = os.getenv("STREAM_URL")
+
+TEXT_MODEL = TextModel.LARGE.value 
 
 PERSON_1 = persons.BrokeMaxMaxbetov
 PERSON_2 = persons.BrokeSaveliiJournalistov

@@ -12,7 +12,8 @@ from config import (
     OPENAI_API_KEY, PROXY_URL, 
     SPEECH_TOKEN, STREAM_KEY, 
     STREAM_URL, PERSON_1, 
-    PERSON_2, FPS, MAIN_FONT_PATH
+    PERSON_2, FPS, 
+    MAIN_FONT_PATH, TEXT_MODEL
 )
 
 from donation.utils import get_donations
@@ -83,7 +84,12 @@ def create_video(file_path: str, donations: list) -> None:
 async def dialog_generation() -> None:
     speech = Speech(SPEECH_TOKEN)
 
-    person_config = dict(openai_api_key=OPENAI_API_KEY, proxy_url=PROXY_URL)
+    person_config = dict(
+        openai_api_key=OPENAI_API_KEY, 
+        proxy_url=PROXY_URL, 
+        text_model=TEXT_MODEL,
+        wipe_memory_after=5 
+    )
 
     person_1 = PersonAI(**person_config, model=PERSON_1)
     person_2 = PersonAI(**person_config, model=PERSON_2)
@@ -164,6 +170,9 @@ def video_streaming() -> None:
 
                         with suppress(Exception):
                             subprocess.run(query.split(" "))
+
+                        if counter > 10:
+                            os.remove(f"{videos_dir}{counter-10}.mp4")
 
                         counter += 1  
 

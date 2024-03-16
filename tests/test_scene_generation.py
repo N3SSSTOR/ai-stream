@@ -1,5 +1,11 @@
 from moviepy import editor 
 
+
+"""
+sudo apt install imagemagick
+"""
+
+
 BASE_DIR = "assets/"
 
 X_OFFSET = 80

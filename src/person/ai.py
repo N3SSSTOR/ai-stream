@@ -4,6 +4,7 @@ import openai
 import httpx 
 
 from .models import PersonModel
+from ._types import TextModel
 
 
 class PersonAI:
@@ -13,8 +14,12 @@ class PersonAI:
         openai_api_key: str,
         proxy_url: str,
         model: PersonModel,
+        text_model: str = TextModel.LARGE.value,
+        wipe_memory_after: int | None = None 
     ) -> None:
         self.words_correction = model.words_correction
+        self.text_model = text_model
+        self.wipe_memory_after = wipe_memory_after
         self.messages = []
         self.messages.append({
             "role": "system", 
@@ -38,13 +43,17 @@ class PersonAI:
             messages=[
                 *self.messages,
             ],
-            model="gpt-3.5-turbo",
+            model=self.text_model,
             n=1,
             **kwargs 
         )
 
         answer = chat_completion.choices[0].message.content 
         self.messages.append({"role": "assistant", "content": answer})
+
+        if self.wipe_memory_after:
+            if len(self.messages) > self.wipe_memory_after:
+                self.messages = [self.messages[0]]
 
         answer = answer.replace('"', "")
 

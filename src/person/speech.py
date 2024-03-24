@@ -5,6 +5,8 @@ import wave
 
 import aiohttp 
 
+from config import AUDIO_DIR
+
 
 class Speech:
 
@@ -102,7 +104,7 @@ class Speech:
                 data=data
             ) as response:       
                 content = await response.read()     
-                file_path = f"upload/audio/{file_name}"
+                file_path = AUDIO_DIR + file_name
 
                 raw_file_path = file_path + ".raw"
                 with open(raw_file_path, "wb") as f:

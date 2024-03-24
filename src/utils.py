@@ -1,5 +1,7 @@
-from contextlib import suppress
+import contextlib
 import subprocess 
+import asyncio 
+import json 
 import time 
 import os 
 
@@ -8,22 +10,80 @@ import moviepy.editor as mvp
 from person.ai import PersonAI
 from person.speech import Speech
 
-from config import (
-    OPENAI_API_KEY, PROXY_URL, 
-    SPEECH_TOKEN, STREAM_KEY, 
-    STREAM_URL, PERSON_1, 
-    PERSON_2, FPS, 
-    MAIN_FONT_PATH, TEXT_MODEL
-)
+from config import OPENAI_API_KEY, PROXY_URL, SPEECH_TOKEN, STREAM_KEY, STREAM_URL
+from config import PERSON_1, PERSON_2, FPS, TEXT_MODEL, TEMPERATURE, WIPE_PERSON_MEMORY_AFTER 
+from config import AUDIO_DIR, RESULT_DIR, MAIN_DIR, IN_PROCESS_DIR, MAIN_FONT_PATH, CONTROLS_PATH
 
 from donation.utils import get_donations
 from donation.database._requests import add_processed_donation, get_processed_donations
 
 
+def clean_app() -> None:
+    dirs = [MAIN_DIR, AUDIO_DIR, RESULT_DIR, IN_PROCESS_DIR]
+    for dir in dirs:
+        files = os.listdir(dir)
+        for file in files:
+            if file.lower().endswith(".mp3") or file.lower().endswith(".mp4") or file.lower().endswith(".wav"):
+                os.remove(dir + file)
+
+    with open(CONTROLS_PATH, "r") as f:
+        controls = json.loads(f.read()) 
+
+    with open(CONTROLS_PATH, "w") as f:
+        updated_controls = controls.copy()
+        updated_controls["current_video_number"] = 0
+
+        f.write(json.dumps(updated_controls, indent=4))
+
+
+def video_streaming() -> None:
+    counter = 1
+    while True:
+        try:
+            time.sleep(1)
+
+            files = os.listdir(RESULT_DIR)
+            sorted_files = sorted(
+                files, 
+                key=lambda x: int(x.split(".")[0])
+            )
+
+            for file in sorted_files:
+                if file.lower().endswith(".mp4"):
+                    file_counter = int(file.split(".")[0])
+
+                    if file_counter == counter:
+                        video_path = f"{RESULT_DIR}/{file}"
+                        query = (
+                            f"ffmpeg -re -i {video_path} -c:v libx264 -c:a aac -f flv "
+                            f"{STREAM_URL}/{STREAM_KEY}"
+                        )
+
+                        with open(CONTROLS_PATH, "r") as f:
+                            controls = json.loads(f.read()) 
+
+                        with open(CONTROLS_PATH, "w") as f:
+                            updated_controls = controls.copy()
+                            updated_controls["current_video_number"] = counter
+
+                            f.write(json.dumps(updated_controls, indent=4))
+
+                        with contextlib.suppress(Exception):
+                            subprocess.run(query.split(" "))
+
+                        if counter > 10:
+                            os.remove(f"{RESULT_DIR}{counter-10}.mp4")
+
+                        counter += 1
+
+        except Exception as e:
+            print(e)
+
+
 def create_video(file_path: str, donations: list) -> None:
     scene_audio = mvp.AudioFileClip(file_path)
 
-    file_data = file_path.replace("upload/audio/", "").replace(".wav", "").split("_")
+    file_data = file_path.replace(AUDIO_DIR, "").replace(".wav", "").split("_")
 
     speaker = int(file_data[0])
     counter = int(file_data[1])
@@ -67,15 +127,13 @@ def create_video(file_path: str, donations: list) -> None:
         *donations_labels,
     ]) 
 
-    file_name = f"{counter}"
-
-    process_path = f"upload/in_process/{file_name}.mp4"
+    process_path = IN_PROCESS_DIR + str(counter) + ".mp4"
     result_scene.write_videofile(
         process_path, 
         fps=FPS
     )
 
-    query = f"mv {process_path} {process_path.replace('in_process', 'video')}"
+    query = f"mv {process_path} {process_path.replace(IN_PROCESS_DIR, RESULT_DIR)}"
     subprocess.run(query.split(" "))
 
     os.remove(file_path)
@@ -84,21 +142,28 @@ def create_video(file_path: str, donations: list) -> None:
 async def dialog_generation() -> None:
     speech = Speech(SPEECH_TOKEN)
 
-    person_config = dict(
+    person_kwargs = dict(
         openai_api_key=OPENAI_API_KEY, 
         proxy_url=PROXY_URL, 
         text_model=TEXT_MODEL,
-        wipe_memory_after=5 
+        wipe_memory_after=WIPE_PERSON_MEMORY_AFTER 
     )
 
-    person_1 = PersonAI(**person_config, model=PERSON_1)
-    person_2 = PersonAI(**person_config, model=PERSON_2)
+    person_1 = PersonAI(**person_kwargs, model=PERSON_1)
+    person_2 = PersonAI(**person_kwargs, model=PERSON_2)
 
-    question = await person_2.generate_answer("Можешь задать первый вопрос.")
+    question = await person_2.generate_answer(
+        "Можешь задать первый вопрос.", 
+        temperature=TEMPERATURE
+    )
 
     counter = 0 
-    while True:     
-        try:
+    while True:  
+        with open(CONTROLS_PATH, "r") as f:
+            controls = json.loads(f.read())
+            stream_counter = controls.get("current_video_number")
+
+        if stream_counter + 5 > counter:
             counter += 1
 
             all_donations = await get_donations()
@@ -112,7 +177,7 @@ async def dialog_generation() -> None:
 
             print(f"\n\n{'='*5} PERSON II: {'='*5}\n\n{question}\nFILE PATH: {file_path}")
 
-            answer = await person_1.generate_answer(question)
+            answer = await person_1.generate_answer(question, temperature=TEMPERATURE)
 
             counter += 1
             file_path = await speech.text_to_speech(
@@ -138,43 +203,8 @@ async def dialog_generation() -> None:
                     break 
 
             if not question:
-                question = await person_2.generate_answer(answer, temperature=0.5) 
-
-        except Exception as e:
-            print(e)
-
-
-def video_streaming() -> None:
-    videos_dir = "upload/video/"
-    
-    counter = 1
-    while True:
-        try:
-            time.sleep(1)
-
-            files = os.listdir(videos_dir)
-            sorted_files = sorted(
-                files, 
-                key=lambda x: int(x.split(".")[0])
-            )
-
-            for file in sorted_files:
-                if file.lower().endswith(".mp4"):
-                    file_counter = int(file.split(".")[0])
-
-                    if file_counter == counter:
-                        video_path = f"{videos_dir}/{file}"
-                        query = (
-                            f"ffmpeg -re -i {video_path} -f flv {STREAM_URL}/{STREAM_KEY}"
-                        )
-
-                        with suppress(Exception):
-                            subprocess.run(query.split(" "))
-
-                        if counter > 10:
-                            os.remove(f"{videos_dir}{counter-10}.mp4")
-
-                        counter += 1  
-
-        except Exception as e:
-            print(e)
+                question = await person_2.generate_answer(answer, temperature=TEMPERATURE) 
+        
+        else:
+            print("Stream is late, waiting... (ﾉ◕ヮ◕)ﾉ*:・ﾟ✧")
+            await asyncio.sleep(1)

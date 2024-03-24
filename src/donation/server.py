@@ -33,4 +33,4 @@ async def login(code: str):
 
 
 def run_server():
-    uvicorn.run(app, port=5000)
+    uvicorn.run(app, port=5000, host="0.0.0.0")

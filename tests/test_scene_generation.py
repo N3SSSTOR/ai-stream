@@ -1,11 +1,5 @@
 from moviepy import editor 
 
-
-"""
-sudo apt install imagemagick
-"""
-
-
 BASE_DIR = "assets/"
 
 X_OFFSET = 80
@@ -21,9 +15,9 @@ PERSON_2_POS = (X_OFFSET + X_MARGIN, Y_OFFSET)
 
 
 def test() -> None:
-    layout = editor.ImageClip(BASE_DIR + "img/layout_3.png").set_duration(BASE_DURATION)
+    layout = editor.ImageClip(BASE_DIR + "img/layout.png").set_duration(BASE_DURATION)
 
-    img1 = editor.ImageClip(BASE_DIR + "img/broke_max.jpeg")\
+    img1 = editor.ImageClip(BASE_DIR + "img/max_maxbetov.jpeg")\
         .set_duration(BASE_DURATION)\
         .resize(IMG_SCALE)
 
@@ -31,24 +25,23 @@ def test() -> None:
         .set_duration(BASE_DURATION)\
         .resize(IMG_SCALE)
     
-    # videos = []
-    # for i in range(0, BASE_DURATION, VIDEO_DURATION):
-    #     videos.append(
-    #         editor.VideoFileClip(BASE_DIR + "video/stock/journalist.mp4")\
-    #             .set_position(PERSON_2_POS)\
-    #             .set_duration(VIDEO_DURATION)\
-    #             .set_start(i)\
-    #             .resize(img2.size)
-    #     )
+    videos = []
+    for i in range(0, BASE_DURATION, VIDEO_DURATION):
+        videos.append(
+            editor.VideoFileClip(BASE_DIR + "video/stock/journalist.mp4")\
+                .set_position(PERSON_2_POS)\
+                .set_duration(VIDEO_DURATION)\
+                .set_start(i)\
+                .resize(img2.size)
+        )
 
     clips = editor.CompositeVideoClip([
         layout,
         img1.set_position(PERSON_1_POS),
-        img2.set_position(PERSON_2_POS),
-        # *videos
+        *videos
     ])
 
-    clips.write_videofile("result.mp4", fps=1)
+    clips.write_videofile("result.mp4", fps=10)
 
 
 def main() -> None:

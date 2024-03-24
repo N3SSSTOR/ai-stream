@@ -1,32 +1,42 @@
-from threading import Thread 
+import threading 
 import asyncio 
 
-from utils import dialog_generation, video_streaming 
+from utils import dialog_generation, video_streaming, clean_app
 from donation.database.models import async_create_tables
 from donation.server import run_server 
 
 
-async def async_start_generation() -> None:
+async def async_generation() -> None:
     await async_create_tables()
     await dialog_generation()
 
 
-def async_main() -> None:
-    asyncio.run(async_start_generation())
+def start_async_generation() -> None:
+    asyncio.run(async_generation())
 
 
-def main():
-    thread_1 = Thread(target=async_main)
-    thread_2 = Thread(target=video_streaming)
-    thread_3 = Thread(target=run_server)
+def main() -> None:
+    clean_app()
+    
+    choice = input(
+        "\nЧто запускаем?\n\n"
+        "Сервер для авторизации в DonationAlerts - 1\n"
+        "Процесс генерации видео и стриминга - 2 [*]\n\n"
+        ">>> "
+    )
 
-    thread_1.start()
-    thread_2.start()
-    thread_3.start()
+    if choice == "1":
+        run_server() 
 
-    thread_1.join()
-    thread_2.join()
-    thread_3.join()
+    elif choice == "2" or not choice:
+        thread_pool = [threading.Thread(target=start_async_generation),
+                       threading.Thread(target=video_streaming)]
+
+        for thread in thread_pool:
+            thread.start()
+        
+        for thread in thread_pool:
+            thread.join()
 
 
 if __name__ == "__main__":

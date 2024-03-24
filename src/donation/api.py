@@ -1,5 +1,6 @@
 import aiohttp 
 
+from config import PROXY_URL
 from ._types import Scope
 
 
@@ -10,12 +11,14 @@ class DonationAlertsAPI:
         client_id: str,
         client_secret: str,
         redirect_uri: str,
-        scope: Scope
+        scope: Scope,
+        proxy_url: str = PROXY_URL
     ) -> None:
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.scope = scope
+        self.proxy_url = proxy_url
 
         self.base_url = "https://www.donationalerts.com/oauth"
 
@@ -39,7 +42,11 @@ class DonationAlertsAPI:
                 "scope": self.scope
             }
 
-            async with session.post(f"{self.base_url}/token", data=data) as response:
+            async with session.post(
+                f"{self.base_url}/token", 
+                data=data,
+                proxy=self.proxy_url
+            ) as response:
                 data = await response.json()
                 return {
                     "access": data.get("access_token"),
@@ -57,7 +64,11 @@ class DonationAlertsAPI:
                 "refresh_token": refresh_token,
                 "scope": self.scope
             }
-            async with session.post(f"{self.base_url}/token", data=data) as response:
+            async with session.post(
+                f"{self.base_url}/token", 
+                proxy=self.proxy_url,
+                data=data
+            ) as response:
                 data = await response.json()
                 return {
                     "access": data.get("access_token"),
@@ -74,7 +85,7 @@ class DonationAlertsAPI:
                 "Authorization": f"Bearer {access_token}"
             }
 
-            async with session.get(url, headers=headers) as response:
+            async with session.get(url, headers=headers, proxy=PROXY_URL) as response:
                 return await response.json()
             
     @staticmethod
@@ -87,7 +98,7 @@ class DonationAlertsAPI:
                 "Authorization": f"Bearer {access_token}"
             }
 
-            async with session.get(url, headers=headers) as response:
+            async with session.get(url, headers=headers, proxy=PROXY_URL) as response:
                 data = await response.json()
                 return [
                     {

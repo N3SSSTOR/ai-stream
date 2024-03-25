@@ -141,7 +141,7 @@ def create_video(file_path: str, donations: list) -> None:
     os.remove(file_path)
 
 
-async def dialog_generation() -> None:
+async def async_dialog_generation() -> None:
     speech = Speech(SPEECH_TOKEN)
 
     person_kwargs = dict(

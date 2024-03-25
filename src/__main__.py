@@ -2,14 +2,14 @@ import multiprocessing as mp
 import asyncio 
 import sys 
 
-from utils import dialog_generation, video_streaming, clean_app
+from utils import async_dialog_generation, video_streaming, clean_app
 from donation.database.models import async_create_tables
 from donation.server import run_server 
 
 
 async def async_generation_coro() -> None:
     await async_create_tables()
-    await dialog_generation()
+    await async_dialog_generation()
 
 
 def start_async_generation() -> None:
@@ -27,11 +27,11 @@ def main() -> None:
     )
 
     if choice == "1":
+        asyncio.run(async_create_tables())
         run_server() 
 
-    elif choice == "2" or not choice:
-        processes = [mp.Process(target=start_async_generation),
-                       mp.Process(target=video_streaming)]
+    if choice == "2" or not choice:
+        processes = [mp.Process(target=func) for func in [start_async_generation, video_streaming]]
 
         for process in processes:
             process.start()

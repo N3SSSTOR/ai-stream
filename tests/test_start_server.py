@@ -1,5 +1,5 @@
 import sys 
-sys.path.append("/Users/imac/Desktop/projects/edu/max-maxbetov/src")
+sys.path.append("/Users/imac/Desktop/projects/ai-stream/src")
 
 from donation.server import run_server
 

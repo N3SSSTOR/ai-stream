@@ -23,7 +23,7 @@ RESULT_DIR = UPLOAD_DIR + "video/result/"
 IN_PROCESS_DIR = UPLOAD_DIR + "video/in_process/"
 
 MAIN_FONT_PATH = ASSETS_DIR + "font/FulboArgenta.ttf"
-CONTROLS_PATH = "controls.json"
+INFO_PATH = "info.json"
 
 TEXT_MODEL = TextModel.LARGE.value 
 

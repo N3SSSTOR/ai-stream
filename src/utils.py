@@ -12,7 +12,7 @@ from person.speech import Speech
 
 from config import OPENAI_API_KEY, PROXY_URL, SPEECH_TOKEN, STREAM_KEY, STREAM_URL
 from config import PERSON_1, PERSON_2, FPS, TEXT_MODEL, TEMPERATURE, WIPE_PERSON_MEMORY_AFTER 
-from config import AUDIO_DIR, RESULT_DIR, MAIN_DIR, IN_PROCESS_DIR, MAIN_FONT_PATH, CONTROLS_PATH
+from config import AUDIO_DIR, RESULT_DIR, MAIN_DIR, IN_PROCESS_DIR, MAIN_FONT_PATH, INFO_PATH
 
 from donation.utils import get_donations
 from donation.database._requests import add_processed_donation, get_processed_donations
@@ -26,14 +26,14 @@ def clean_app() -> None:
             if file.lower().endswith(".mp3") or file.lower().endswith(".mp4") or file.lower().endswith(".wav"):
                 os.remove(dir + file)
 
-    with open(CONTROLS_PATH, "r") as f:
-        controls = json.loads(f.read()) 
+    with open(INFO_PATH, "r") as f:
+        info = json.loads(f.read()) 
 
-    with open(CONTROLS_PATH, "w") as f:
-        updated_controls = controls.copy()
-        updated_controls["current_video_number"] = 0
+    with open(INFO_PATH, "w") as f:
+        updated_info = info.copy()
+        updated_info["current_video_number"] = 0
 
-        f.write(json.dumps(updated_controls, indent=4))
+        f.write(json.dumps(updated_info, indent=4))
 
 
 def video_streaming() -> None:
@@ -59,14 +59,14 @@ def video_streaming() -> None:
                             f"{STREAM_URL}/{STREAM_KEY}"
                         )
 
-                        with open(CONTROLS_PATH, "r") as f:
-                            controls = json.loads(f.read()) 
+                        with open(INFO_PATH, "r") as f:
+                            info = json.loads(f.read()) 
 
-                        with open(CONTROLS_PATH, "w") as f:
-                            updated_controls = controls.copy()
-                            updated_controls["current_video_number"] = counter
+                        with open(INFO_PATH, "w") as f:
+                            updated_info = info.copy()
+                            updated_info["current_video_number"] = counter
 
-                            f.write(json.dumps(updated_controls, indent=4))
+                            f.write(json.dumps(updated_info, indent=4))
 
                         with contextlib.suppress(Exception):
                             subprocess.run(query.split(" "))
@@ -96,36 +96,38 @@ def create_video(file_path: str, donations: list) -> None:
     current_scene = current_scene.set_duration(scene_audio.duration)\
         .set_audio(scene_audio)
     
-    donations_count_label = mvp.TextClip(txt=f"Всего донатов: {len(donations)}", 
-                                 color="white",
-                                 font=MAIN_FONT_PATH,
-                                 fontsize=45)\
-        .set_duration(current_scene.duration)\
-        .set_position((80, 25))
+    result_scene_pattern = [current_scene]
     
-    top_donations = sorted(donations, key=lambda x: x['amount'], reverse=True)[:5]
-    donations_labels = []
+    if donations:
+        donations_count_label = mvp.TextClip(txt=f"Всего донатов: {len(donations)}", 
+                                    color="white",
+                                    font=MAIN_FONT_PATH,
+                                    fontsize=45)\
+            .set_duration(current_scene.duration)\
+            .set_position((80, 25))
+        
+        top_donations = sorted(donations, key=lambda x: x['amount'], reverse=True)[:5]
+        donations_labels = []
 
-    x_offset = 1225
-    y_offset = 60 
-    y_spacing = 125 
+        x_offset = 1225
+        y_offset = 60 
+        y_spacing = 125 
 
-    for i, donation in enumerate(top_donations):
-        donations_labels.append(
-            mvp.TextClip(
-                txt=f"{donation.get('username')} - {donation.get('amount')} RUB",
-                color="gold" if i == 0 else "gray",
-                font=MAIN_FONT_PATH,
-                fontsize=55 
-            ).set_duration(current_scene.duration)\
-             .set_position((x_offset, y_offset + (y_spacing * (i + 1))))
-        )
+        for i, donation in enumerate(top_donations):
+            donations_labels.append(
+                mvp.TextClip(
+                    txt=f"{donation.get('username')} - {donation.get('amount')} RUB",
+                    color="gold" if i == 0 else "gray",
+                    font=MAIN_FONT_PATH,
+                    fontsize=55 
+                ).set_duration(current_scene.duration)\
+                .set_position((x_offset, y_offset + (y_spacing * (i + 1))))
+            )
+
+        result_scene_pattern.append(donations_count_label)
+        result_scene_pattern += donations_labels
     
-    result_scene = mvp.CompositeVideoClip([
-        current_scene,
-        donations_count_label,
-        *donations_labels,
-    ]) 
+    result_scene = mvp.CompositeVideoClip(result_scene_pattern) 
 
     process_path = IN_PROCESS_DIR + str(counter) + ".mp4"
     result_scene.write_videofile(
@@ -159,9 +161,9 @@ async def dialog_generation() -> None:
 
     counter = 0 
     while True:  
-        with open(CONTROLS_PATH, "r") as f:
-            controls = json.loads(f.read())
-            stream_counter = controls.get("current_video_number")
+        with open(INFO_PATH, "r") as f:
+            info = json.loads(f.read())
+            stream_counter = info.get("current_video_number")
 
         if stream_counter + 5 > counter:
             counter += 1
@@ -192,19 +194,20 @@ async def dialog_generation() -> None:
             question = ""
             processed_donations = await get_processed_donations()
 
-            for donation in all_donations:
-                if donation.get("id") not in processed_donations:
-                    question = (
-                        f"Зритель по имени {donation.get('username')} " 
-                        f"отправил вам {donation.get('amount')} рублей и задал "
-                        f"вопрос: {donation.get('message')}"
-                    )
-                    await add_processed_donation(donation.get("id"))
-                    break 
+            if all_donations:
+                for donation in all_donations:
+                    if donation.get("id") not in processed_donations:
+                        question = (
+                            f"Зритель по имени {donation.get('username')} " 
+                            f"отправил вам {donation.get('amount')} рублей и задал "
+                            f"вопрос: {donation.get('message')}"
+                        )
+                        await add_processed_donation(donation.get("id"))
+                        break 
 
             if not question:
                 question = await person_2.generate_answer(answer, temperature=TEMPERATURE) 
         
         else:
-            print("Stream is late, waiting... (ﾉ◕ヮ◕)ﾉ*:・ﾟ✧")
+            print("Стрим не успевает за генерацией...")
             await asyncio.sleep(1)

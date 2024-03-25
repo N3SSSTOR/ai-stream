@@ -1,3 +1,6 @@
+import sys 
+sys.path.append("/Users/imac/Desktop/projects/ai-stream/src")
+
 import multiprocessing as mp
 import asyncio 
 import sys 

@@ -89,7 +89,7 @@ class DonationAlertsAPI:
                 return await response.json()
             
     @staticmethod
-    async def get_donations(access_token: str) -> list:
+    async def get_donations(access_token: str) -> list | None:
         async with aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(ssl=False)
         ) as session:
@@ -100,12 +100,14 @@ class DonationAlertsAPI:
 
             async with session.get(url, headers=headers, proxy=PROXY_URL) as response:
                 data = await response.json()
-                return [
-                    {
-                        "id": donation.get("id"),
-                        "username": donation.get("username"),
-                        "message": donation.get("message"),
-                        "amount": donation.get("amount"),
-                    } 
-                    for donation in data.get("data") 
-                ]
+
+                if data.get("data"):
+                    return [
+                        {
+                            "id": donation.get("id"),
+                            "username": donation.get("username"),
+                            "message": donation.get("message"),
+                            "amount": donation.get("amount"),
+                        } 
+                        for donation in data.get("data") 
+                    ]

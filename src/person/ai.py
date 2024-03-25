@@ -40,9 +40,7 @@ class PersonAI:
     async def generate_answer(self, prompt: str, **kwargs) -> str:
         self.messages.append({"role": "user", "content": prompt})
         chat_completion = await self.client.chat.completions.create(
-            messages=[
-                *self.messages,
-            ],
+            messages=self.messages,
             model=self.text_model,
             n=1,
             **kwargs 

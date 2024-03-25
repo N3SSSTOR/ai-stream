@@ -6,13 +6,13 @@ from .server import DONATION_CONFIG
 async def refresh_tokens() -> None:
     tokens = await get_tokens()
 
-    donation = DonationAlertsAPI(**DONATION_CONFIG)
+    if tokens:
+        donation = DonationAlertsAPI(**DONATION_CONFIG)
+        new_tokens = await donation.refresh_tokens(tokens.get("refresh"))
 
-    new_tokens = await donation.refresh_tokens(tokens.get("refresh"))
-
-    if new_tokens.get("access") and new_tokens.get("refresh"):
         await set_tokens(new_tokens.get("access"), new_tokens.get("refresh"))
         return
+    
     print("Не удалось обновить токены")
 
 

@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, responses
 
-from config import DONATION_ID, DONATION_SECRET
+from config import DONATION_ID, DONATION_SECRET, DONATION_REDIRECT_URI
 from .api import DonationAlertsAPI
 from ._types import Scope 
 from .database._requests import set_tokens
@@ -9,7 +9,7 @@ from .database._requests import set_tokens
 DONATION_CONFIG = dict(
     client_id=DONATION_ID, 
     client_secret=DONATION_SECRET,
-    redirect_uri="http://127.0.0.1:5000/login",
+    redirect_uri=DONATION_REDIRECT_URI,
     scope=Scope.DONATION_INDEX.value
 )
 

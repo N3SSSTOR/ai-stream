@@ -8,9 +8,9 @@ import os
 import moviepy.editor as mvp 
 
 from person.ai import PersonAI
-from person.speech import Speech
+from person.tts import TTS
 
-from config import OPENAI_API_KEY, PROXY_URL, SPEECH_TOKEN, STREAM_KEY, STREAM_URL
+from config import OPENAI_API_KEY, PROXY_URL, TTS_TOKEN, STREAM_KEY, STREAM_URL
 from config import PERSON_1, PERSON_2, FPS, TEXT_MODEL, TEMPERATURE, WIPE_PERSON_MEMORY_AFTER 
 from config import AUDIO_DIR, RESULT_DIR, MAIN_DIR, IN_PROCESS_DIR, MAIN_FONT_PATH, INFO_PATH
 
@@ -142,7 +142,7 @@ def create_video(file_path: str, donations: list) -> None:
 
 
 async def async_dialog_generation() -> None:
-    speech = Speech(SPEECH_TOKEN)
+    tts = TTS(TTS_TOKEN)
 
     person_kwargs = dict(
         openai_api_key=OPENAI_API_KEY, 
@@ -170,7 +170,7 @@ async def async_dialog_generation() -> None:
 
             all_donations = await get_donations()
 
-            file_path = await speech.text_to_speech(
+            file_path = await tts.text_to_speech(
                 text=question,
                 voice=PERSON_2.voice,
                 file_name=f"2_{counter}_{int(time.time())}"
@@ -182,7 +182,7 @@ async def async_dialog_generation() -> None:
             answer = await person_1.generate_answer(question, temperature=TEMPERATURE)
 
             counter += 1
-            file_path = await speech.text_to_speech(
+            file_path = await tts.text_to_speech(
                 text=answer,
                 voice=PERSON_1.voice,
                 file_name=f"1_{counter}_{int(time.time())}"

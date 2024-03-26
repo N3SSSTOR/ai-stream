@@ -8,7 +8,7 @@ dotenv.load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PROXY_URL = os.getenv("PROXY_URL")
-SPEECH_TOKEN = os.getenv("SPEECH_TOKEN")
+TTS_TOKEN = os.getenv("TTS_TOKEN")
 DONATION_ID = os.getenv("DONATION_ID")
 DONATION_SECRET = os.getenv("DONATION_SECRET")
 STREAM_KEY = os.getenv("STREAM_KEY")
@@ -35,4 +35,4 @@ DB_CONNECTION_URL = "sqlite+aiosqlite:///db.sqlite"
 ECHO = False  
 
 FPS = 10
-TEMPERATURE = 0.7 
+TEMPERATURE = 0.5 

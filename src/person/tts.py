@@ -8,7 +8,7 @@ import aiohttp
 from config import AUDIO_DIR
 
 
-class Speech:
+class TTS:
 
     def __init__(
         self,

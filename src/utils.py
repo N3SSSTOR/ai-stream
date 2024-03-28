@@ -42,6 +42,7 @@ def video_streaming() -> None:
         time.sleep(1)
 
         files = os.listdir(RESULT_DIR)
+        files.remove(".gitkeep")
         sorted_files = sorted(
             files, 
             key=lambda x: int(x.split(".")[0])

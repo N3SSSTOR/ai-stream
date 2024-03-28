@@ -53,12 +53,6 @@ def video_streaming() -> None:
                     file_counter = int(file.split(".")[0])
 
                     if file_counter == counter:
-                        video_path = f"{RESULT_DIR}/{file}"
-                        query = (
-                            f"ffmpeg -re -i {video_path} -c:v libx264 -c:a aac -f flv "
-                            f"{STREAM_URL}/{STREAM_KEY}"
-                        )
-
                         with open(INFO_PATH, "r") as f:
                             info = json.loads(f.read()) 
 
@@ -67,6 +61,16 @@ def video_streaming() -> None:
                             updated_info["current_video_number"] = counter
 
                             f.write(json.dumps(updated_info, indent=4))
+
+                        video_path = f"{RESULT_DIR}/{file}"
+                        query = (
+                            f"ffmpeg -re -i {video_path} "
+                            f"-c:v libx264 -c:a aac "
+                            f"-preset ultrafast "
+                            f"-crf 0 "
+                            f"-threads 3 "
+                            f"-f flv {STREAM_URL}/{STREAM_KEY}"
+                        )
 
                         with contextlib.suppress(Exception):
                             subprocess.run(query.split(" "))

@@ -43,6 +43,7 @@ def video_streaming() -> None:
 
         files = os.listdir(RESULT_DIR)
         files.remove(".gitkeep")
+
         sorted_files = sorted(
             files, 
             key=lambda x: int(x.split(".")[0])
@@ -63,17 +64,25 @@ def video_streaming() -> None:
                         f.write(json.dumps(updated_info, indent=4))
 
                     video_path = f"{RESULT_DIR}/{file}"
-                    query = (
-                        f"ffmpeg -re -i {video_path} "
-                        f"-c:v libx264 -c:a aac "
-                        f"-preset ultrafast "
-                        f"-crf 0 "
-                        f"-threads 3 "
-                        f"-f flv {STREAM_URL}/{STREAM_KEY}"
-                    )
+
+                    query = [
+                        "ffmpeg",
+                        "-reconnect", "1",
+                        "-reconnect_at_eof", "1",
+                        "-reconnect_streamed", "1",
+                        "-reconnect_delay_max", "2",
+                        "-re",
+                        "-i", video_path,
+                        "-c:v", "libx264",
+                        "-c:a", "aac",
+                        "-preset", "ultrafast",
+                        "-crf", "0",
+                        "-threads", "3",
+                        "-f", "flv", f"{STREAM_URL}/{STREAM_KEY}"
+                    ]
 
                     with contextlib.suppress(Exception):
-                        subprocess.run(query.split(" "))
+                        subprocess.run(query)
 
                     if counter > 10:
                         os.remove(f"{RESULT_DIR}{counter-10}.mp4")

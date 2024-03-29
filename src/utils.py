@@ -67,10 +67,6 @@ def video_streaming() -> None:
 
                     query = [
                         "ffmpeg",
-                        "-reconnect", "1",
-                        "-reconnect_at_eof", "1",
-                        "-reconnect_streamed", "1",
-                        "-reconnect_delay_max", "2",
                         "-re",
                         "-i", video_path,
                         "-c:v", "libx264",
@@ -78,7 +74,9 @@ def video_streaming() -> None:
                         "-preset", "ultrafast",
                         "-crf", "0",
                         "-threads", "3",
-                        "-f", "flv", f"{STREAM_URL}/{STREAM_KEY}"
+                        "-f", "flv",
+                        "-timeout", "15"
+                        f"{STREAM_URL}/{STREAM_KEY}"
                     ]
 
                     with contextlib.suppress(Exception):

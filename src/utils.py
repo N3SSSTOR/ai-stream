@@ -69,12 +69,12 @@ def video_streaming() -> None:
                         "ffmpeg",
                         "-re",
                         "-i", video_path,
+                        "-timeout", "10",
                         "-c:v", "libx264",
                         "-c:a", "aac",
                         "-preset", "ultrafast",
                         "-crf", "0",
                         "-threads", "3",
-                        "-timeout", "15",
                         "-f", "flv",
                         f"{STREAM_URL}/{STREAM_KEY}"
                     ]

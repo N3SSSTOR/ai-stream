@@ -75,7 +75,7 @@ def video_streaming() -> None:
                         "-crf", "0",
                         "-threads", "3",
                         "-f", "flv",
-                        "-t", "10",
+                        "-timeout", "15000",
                         f"{STREAM_URL}/{STREAM_KEY}"
                     ]
 

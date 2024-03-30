@@ -67,7 +67,6 @@ def video_streaming() -> None:
 
                     query = [
                         "ffmpeg", "-re",
-                        "-stream_loop", "-1",
                         "-i", video_path,
                         "-c:v", "libx264",
                         "-c:a", "aac",

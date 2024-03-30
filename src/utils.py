@@ -66,21 +66,18 @@ def video_streaming() -> None:
                     video_path = f"{RESULT_DIR}/{file}"
 
                     query = [
-                        "ffmpeg",
-                        "-re",
+                        "ffmpeg", "-re",
+                        "-stream_loop", "-1",
                         "-i", video_path,
                         "-c:v", "libx264",
                         "-c:a", "aac",
                         "-preset", "ultrafast",
                         "-crf", "0",
-                        "-threads", "3",
                         "-f", "flv",
-                        "-timeout", "15000",
                         f"{STREAM_URL}/{STREAM_KEY}"
                     ]
 
-                    with contextlib.suppress(Exception):
-                        subprocess.run(query)
+                    subprocess.run(query)
 
                     if counter > 10:
                         os.remove(f"{RESULT_DIR}{counter-10}.mp4")

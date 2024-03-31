@@ -169,7 +169,7 @@ async def async_dialog_generation() -> None:
             info = json.loads(f.read())
             stream_counter = info.get("current_video_number")
 
-        if stream_counter + 5 > counter:
+        if stream_counter + 10 > counter:
             counter += 1
 
             all_donations = await get_donations()

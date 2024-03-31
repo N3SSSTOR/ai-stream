@@ -76,7 +76,7 @@ def video_streaming() -> None:
                         f"{STREAM_URL}/{STREAM_KEY}"
                     ]
 
-                    subprocess.run(query)
+                    subprocess.run(query, timeout=120)
 
                     if counter > 10:
                         os.remove(f"{RESULT_DIR}{counter-10}.mp4")
